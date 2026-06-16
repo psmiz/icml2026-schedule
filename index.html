@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ICML 2026 · Sumin's Schedule Map</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --panel:#fff; --ink:#1a1d27; --muted:#6b7280; --line:#e6e9f0;
+    --accent:#1971c2; --accent-soft:#e7f1fb; --star:#f59f00; --shadow:0 1px 3px rgba(20,30,60,.08);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* ---------- header ---------- */
+  header{background:linear-gradient(135deg,#0b2545,#13315c 55%,#1971c2);color:#fff;padding:26px 22px 22px}
+  .wrap{max-width:1180px;margin:0 auto}
+  header h1{margin:0 0 4px;font-size:1.55rem;letter-spacing:-.4px}
+  header .sub{opacity:.85;font-size:.92rem}
+  header .meta{margin-top:4px;font-size:.8rem;opacity:.7}
+  .interests{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px}
+  .interests span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);
+       padding:3px 10px;border-radius:20px;font-size:.78rem}
+
+  /* ---------- sticky controls ---------- */
+  .controls{position:sticky;top:0;z-index:30;background:rgba(244,246,251,.95);
+       backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 22px}
+  .controls .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .tabs{display:flex;gap:4px;background:#e9edf5;border-radius:10px;padding:3px}
+  .tabs button{border:0;background:transparent;padding:7px 16px;border-radius:8px;font-weight:600;
+       font-size:.9rem;color:var(--muted);cursor:pointer}
+  .tabs button.active{background:#fff;color:var(--accent);box-shadow:var(--shadow)}
+  #search{flex:1;min-width:180px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;
+       font-size:.9rem;background:#fff}
+  .ctl{display:flex;align-items:center;gap:6px;font-size:.85rem;color:var(--muted)}
+  select,.toggle{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;
+       font-size:.85rem;color:var(--ink);cursor:pointer}
+  .toggle{display:inline-flex;align-items:center;gap:6px;user-select:none}
+  .toggle input{accent-color:var(--accent)}
+
+  /* date page tabs */
+  .datebar{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+  .datebtn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 13px;
+       font-size:.84rem;font-weight:600;color:var(--muted);cursor:pointer}
+  .datebtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+  /* theme legend / filter chips */
+  .legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  /* on phones, hide the theme legend/filter bar (card tags stay) */
+  @media (max-width:700px){ .legend{display:none} }
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;
+       font-size:.76rem;font-weight:600;cursor:pointer;border:1.5px solid transparent;
+       background:#fff;box-shadow:var(--shadow);opacity:.55;transition:opacity .15s}
+  .chip.on{opacity:1}
+  .chip .dot{width:9px;height:9px;border-radius:50%}
+  .chip .ct{color:var(--muted);font-weight:500}
+
+  main{max-width:1180px;margin:0 auto;padding:18px 22px 80px}
+  .count{color:var(--muted);font-size:.85rem;margin:6px 2px 12px}
+
+  /* ---------- day / session headers ---------- */
+  .day{margin:26px 0 6px;display:flex;align-items:baseline;gap:10px;
+       border-bottom:2px solid var(--accent);padding-bottom:6px}
+  .day h2{margin:0;font-size:1.2rem}
+  .day .dow{color:var(--muted);font-size:.85rem;font-weight:500}
+  .day .n{margin-left:auto;color:var(--muted);font-size:.8rem}
+  .sess{margin:18px 0 8px;display:flex;align-items:center;gap:10px;scroll-margin-top:150px}
+  .sess h3{margin:0;font-size:1rem;color:#2b3a55}
+  .sess h3 .cnt{color:var(--muted);font-weight:500;font-size:.86rem}
+  .sess .info{color:var(--muted);font-size:.82rem}
+  .day{scroll-margin-top:150px}
+
+  /* poster session navigation bar */
+  .sessnav{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin:4px 0 6px;padding:11px 13px;
+       background:#fff;border:1px solid var(--line);border-radius:11px;box-shadow:var(--shadow)}
+  .sessnav-lbl{font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;
+       letter-spacing:.05em;margin-right:2px}
+  .sessnav-item{font-size:.82rem;font-weight:600;color:var(--accent);background:var(--accent-soft);
+       padding:5px 11px;border-radius:8px;text-decoration:none;white-space:nowrap}
+  .sessnav-item:hover{background:#d3e6fb;text-decoration:none}
+  .sessnav-item b{font-weight:700}
+  .grouphdr{margin:14px 0 6px;font-size:.8rem;font-weight:700;letter-spacing:.06em;
+       text-transform:uppercase;color:var(--accent)}
+
+  /* ---------- cards ---------- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(330px,100%),1fr));gap:12px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 15px;
+       box-shadow:var(--shadow);position:relative;display:flex;flex-direction:column;gap:7px}
+  .card.own{border:2px solid var(--star);background:#fffdf3}
+  .card .badge{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+       color:var(--muted)}
+  .card .num{position:absolute;top:11px;right:13px;font-size:.72rem;font-weight:700;color:#fff;
+       background:var(--accent);border-radius:6px;padding:2px 7px;min-width:26px;text-align:center}
+  .card .num.na{background:#c3cad6}
+  .card h4{margin:0;font-size:.97rem;line-height:1.35;padding-right:42px}
+  .card .auth{font-size:.82rem;color:var(--muted)}
+  .card .topic{font-size:.76rem;color:#7b6cc4;font-weight:500}
+  .card .when{font-size:.78rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 12px}
+  .card .tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+  .tag{font-size:.68rem;font-weight:600;padding:2px 8px;border-radius:12px;
+       background:#eef1f6;color:#5a6472;border:1px solid #e2e7f0}
+  .card .links{display:flex;gap:12px;align-items:center;font-size:.78rem;margin-top:2px}
+  .starbtn{border:1px solid var(--line);background:#fff;border-radius:6px;padding:2px 9px;
+       font-size:.74rem;font-weight:600;cursor:pointer;color:var(--muted)}
+  .starbtn.on{background:#fff7e0;border-color:var(--star);color:#b8860b}
+  .card.picked{border-color:var(--star);box-shadow:0 0 0 1.5px var(--star) inset, var(--shadow)}
+  #clearStars{color:var(--muted);cursor:pointer;font-size:.78rem;text-decoration:underline}
+  .card .abs{font-size:.8rem;color:#54607a;display:none}
+  .card.exp .abs{display:block}
+  .star{position:absolute;top:10px;right:12px;color:var(--star);font-size:1rem}
+  .empty{color:var(--muted);padding:40px;text-align:center;background:#fff;border-radius:12px;
+       border:1px dashed var(--line)}
+  .mine{background:#fffdf3;border:2px solid var(--star);border-radius:14px;padding:14px 18px;margin:14px 0 4px}
+  .mine h3{margin:0 0 8px;font-size:1.05rem}
+  .hide{display:none!important}
+  footer{max-width:1180px;margin:0 auto;padding:20px 22px 40px;color:var(--muted);font-size:.8rem;
+       border-top:1px solid var(--line)}
+  .pill-note{background:var(--accent-soft);color:#1a4d80;border-radius:8px;padding:8px 12px;
+       font-size:.82rem;margin:10px 0}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>ICML 2026 Schedule Map</h1>
+    <div class="meta">ICML 2026 · Seoul · July 5–11 &nbsp;|&nbsp; <span id="hGen"></span></div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="wrap">
+    <div class="row">
+      <div class="tabs">
+        <button data-tab="overview" class="active">Overview</button>
+        <button data-tab="events">Events</button>
+        <button data-tab="posters">Posters</button>
+      </div>
+      <input id="search" placeholder="Search titles, authors, topics…">
+      <label class="toggle"><input type="checkbox" id="relOnly" checked> Relevant to me only</label>
+      <label class="toggle" id="starOnlyWrap"><input type="checkbox" id="starOnly"> ★ Starred only <span id="starCount"></span></label>
+      <span id="clearStars">clear stars</span>
+      <div class="ctl" id="sortWrap">Poster order:
+        <select id="posterSort">
+          <option value="num">By poster #</option>
+          <option value="rel">By relevance</option>
+          <option value="title">By title</option>
+        </select>
+      </div>
+    </div>
+    <div class="datebar" id="datebar"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+</div>
+
+<main>
+  <div class="count" id="count"></div>
+  <div id="view"></div>
+</main>
+
+<footer class="wrap">
+  Built from the official ICML 2026 virtual schedule (icml.cc). Relevance scoring is heuristic,
+  tuned to Sumin's stated interests — toggle “Relevant to me only” off to browse everything.
+  Poster board numbers are published ~1 week before the conference; re-run <code>build.py</code> to refresh.
+</footer>
+
+<script src="data.js"></script>
+<script>
+const D = window.ICML_DATA;
+const TH = {}; D.themes.forEach(t=>TH[t.key]=t);
+const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const TYPE_ORDER = ["Tutorial","Invited Talk","Oral","Workshop"];
+
+const state = {
+  tab:"overview", q:"", relOnly:true, starOnly:false, posterSort:"num", date:"all",
+  themes:new Set()  // empty = all themes
+};
+
+/* ---------- starred posters (persisted in localStorage) ---------- */
+const STAR_KEY="icml2026_stars";
+let starred=new Set();
+try{ starred=new Set(JSON.parse(localStorage.getItem(STAR_KEY)||"[]")); }catch(e){}
+function isStarred(p){ return p.own || starred.has(p.id); }   // your own papers always count
+function saveStars(){ try{ localStorage.setItem(STAR_KEY,JSON.stringify([...starred])); }catch(e){} }
+function toggleStar(id,btn){
+  if(starred.has(id)) starred.delete(id); else starred.add(id);
+  saveStars();
+  if(state.starOnly){ render(); }                 // card may need to hide/show
+  else if(btn){                                   // light update, keep scroll position
+    const on=starred.has(id);
+    btn.className="starbtn"+(on?" on":"");
+    btn.textContent=on?"★ Starred":"☆ Star";
+    btn.closest(".card").classList.toggle("picked",on);
+  }
+  updateStarCount();
+}
+function clearStars(){
+  if(!starred.size) return;
+  if(!confirm("Remove all "+starred.size+" starred posters?")) return;
+  starred.clear(); saveStars(); render();
+}
+function updateStarCount(){
+  const el=document.getElementById("starCount");
+  if(el) el.textContent = starred.size?`(${starred.size})`:"";
+}
+
+/* ---------- header ---------- */
+document.getElementById("hGen").textContent = "generated " + D.generated;
+
+/* ---------- legend / theme filters ---------- */
+const legend = document.getElementById("legend");
+D.themes.forEach(t=>{
+  const c = document.createElement("div");
+  c.className="chip on"; c.dataset.k=t.key;
+  c.innerHTML = `<span class="dot" style="background:${t.color}"></span>${esc(t.label)}
+                 <span class="ct" id="ct_${t.key}"></span>`;
+  c.onclick=()=>{ toggleTheme(t.key,c); };
+  legend.appendChild(c);
+});
+function toggleTheme(k,el){
+  // click logic: if all-on (empty set) -> isolate this one; else toggle membership
+  if(state.themes.size===0){ state.themes=new Set([k]); }
+  else if(state.themes.has(k)){ state.themes.delete(k); if(state.themes.size===0){} }
+  else { state.themes.add(k); }
+  // if every theme selected, treat as "all"
+  if(state.themes.size===D.themes.length) state.themes=new Set();
+  syncChips(); render();
+}
+function syncChips(){
+  document.querySelectorAll(".chip").forEach(c=>{
+    const on = state.themes.size===0 || state.themes.has(c.dataset.k);
+    c.classList.toggle("on",on);
+  });
+}
+
+/* ---------- controls ---------- */
+document.querySelectorAll(".tabs button").forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active"); state.tab=b.dataset.tab;
+    const onPosters = state.tab==="posters";
+    document.getElementById("sortWrap").style.display = onPosters?"flex":"none";
+    document.getElementById("starOnlyWrap").style.display = onPosters?"inline-flex":"none";
+    document.getElementById("clearStars").style.display = onPosters?"inline":"none";
+    if(state.tab!=="overview"){
+      const dates=tabDates();
+      if(!dates.includes(state.date)) state.date=dates[0];  // land on first day of this tab
+    }
+    render();
+  };
+});
+document.getElementById("search").oninput=e=>{state.q=e.target.value.toLowerCase();render();};
+document.getElementById("relOnly").onchange=e=>{state.relOnly=e.target.checked;render();};
+document.getElementById("starOnly").onchange=e=>{state.starOnly=e.target.checked;render();};
+document.getElementById("posterSort").onchange=e=>{state.posterSort=e.target.value;render();};
+document.getElementById("clearStars").onclick=clearStars;
+
+/* ---------- helpers ---------- */
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function themeOK(item){
+  if(state.themes.size===0) return true;
+  return (item.themes||[]).some(k=>state.themes.has(k));
+}
+function searchOK(item){
+  if(!state.q) return true;
+  const hay = (item.title+" "+(item.authors?item.authors.join(" "):"")+" "+
+              (item.speakers||"")+" "+(item.topic||"")+" "+(item.abstract||"")).toLowerCase();
+  return hay.includes(state.q);
+}
+function relOK(item){ return !state.relOnly || item.score>0; }
+function dateOK(item){ return state.date==="all" || item.date===state.date; }
+function starOK(item){ return !(state.tab==="posters"&&state.starOnly) || isStarred(item); }
+function pass(item){ return relOK(item)&&themeOK(item)&&searchOK(item)&&dateOK(item)&&starOK(item); }
+
+function tabDates(){
+  const src = state.tab==="events"?D.events:D.posters;
+  return [...new Set(src.filter(x=>x.date).map(x=>x.date))].sort();
+}
+function fmtDayShort(d){const dt=new Date(d+"T00:00:00");
+  return DOW[dt.getDay()]+" Jul "+parseInt(d.slice(8),10);}
+function renderDatebar(){
+  const bar=document.getElementById("datebar");
+  if(state.tab==="overview"){ bar.style.display="none"; bar.innerHTML=""; return; }
+  bar.style.display="flex";
+  const dates=tabDates();
+  bar.innerHTML=[`<button class="datebtn ${state.date==='all'?'active':''}" data-d="all">All days</button>`]
+    .concat(dates.map(d=>`<button class="datebtn ${state.date===d?'active':''}" data-d="${d}">${fmtDayShort(d)}</button>`))
+    .join("");
+  bar.querySelectorAll(".datebtn").forEach(b=>b.onclick=()=>{state.date=b.dataset.d;render();});
+}
+function tagHTML(themes){
+  return (themes||[]).map(k=>TH[k]?
+    `<span class="tag">${esc(TH[k].label.split(" ")[0])}</span>`:"").join("");
+}
+function dayLabel(d){
+  const dt=new Date(d+"T00:00:00");
+  return {h:d.replace("2026-0","Jul ").replace("-","/").replace("Jul 7/","Jul "),
+          dow:DOW[dt.getDay()]};
+}
+function fmtDay(d){const dt=new Date(d+"T00:00:00");
+  return "July "+parseInt(d.slice(8),10)+" · "+DOW[dt.getDay()];}
+
+/* ---------- EVENTS view ---------- */
+function renderEvents(){
+  const items = D.events.filter(pass);
+  const byDate={};
+  items.forEach(e=>{(byDate[e.date||"TBD"] ??= []).push(e);});
+  let html="";
+  Object.keys(byDate).sort().forEach(date=>{
+    const evs=byDate[date];
+    html+=`<div class="day"><h2>${date==="TBD"?"Time TBD":fmtDay(date)}</h2>
+           <span class="n">${evs.length} events</span></div>`;
+    TYPE_ORDER.forEach(tp=>{
+      const g=evs.filter(e=>e.type===tp).sort((a,b)=>a.mins-b.mins);
+      if(!g.length) return;
+      html+=`<div class="grouphdr">${esc(tp)}s</div><div class="grid">`;
+      g.forEach(e=>html+=eventCard(e)); html+=`</div>`;
+    });
+  });
+  return html || emptyMsg();
+}
+function eventCard(e){
+  const t=e.time?e.time.replace(/^[A-Za-z]{3}\s+\d+,\s*/,""):"";
+  return `<div class="card ${e.score>0?'':''}" onclick="this.classList.toggle('exp')">
+    <div class="badge">${esc(e.type)}</div>
+    <h4><a href="https://icml.cc${esc(e.url)}" target="_blank" onclick="event.stopPropagation()">${esc(e.title)}</a></h4>
+    ${e.speakers?`<div class="auth">${esc(e.speakers)}</div>`:""}
+    <div class="when"><span>🕑 ${esc(t)||"TBD"}</span>${e.loc?`<span>📍 ${esc(e.loc)}</span>`:""}</div>
+    <div class="tags">${tagHTML(e.themes)}</div>
+    ${e.abstract?`<div class="abs">${esc(e.abstract)}…</div>`:""}
+  </div>`;
+}
+
+/* ---------- POSTERS view ---------- */
+function sessAnchor(s){const a=s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");return "sess-"+(a||"unscheduled");}
+function shortSess(s){return (s&&s!=="—")?s.replace(/poster session/i,"Session").trim():"Unscheduled";}
+function orderSessions(sessions){
+  return Object.keys(sessions).sort((a,b)=>{
+    const s=D.sessions[a],t=D.sessions[b];
+    return (s&&t)?s.start.localeCompare(t.start):a.localeCompare(b);
+  });
+}
+function renderPosters(){
+  const items=D.posters.filter(pass);
+  // group by date -> session
+  const byDate={};
+  items.forEach(p=>{((byDate[p.date||"TBD"] ??= {})[p.session||"—"] ??= []).push(p);});
+  const sorter={
+    num:(a,b)=>( (a.pos??1e9)-(b.pos??1e9) )|| (b.score-a.score) || a.title.localeCompare(b.title),
+    rel:(a,b)=>(b.score-a.score)||a.title.localeCompare(b.title),
+    title:(a,b)=>a.title.localeCompare(b.title)
+  }[state.posterSort];
+  const dates=Object.keys(byDate).sort();
+  let html="";
+
+  // ---- session navigation bar (each with paper count) ----
+  const nav=[];
+  dates.forEach(date=>{
+    const sessions=byDate[date];
+    orderSessions(sessions).forEach(sess=>{
+      nav.push(`<a class="sessnav-item" href="#${sessAnchor(sess)}">${esc(shortSess(sess))} <b>(${sessions[sess].length})</b></a>`);
+    });
+  });
+  if(nav.length) html+=`<div class="sessnav"><span class="sessnav-lbl">Jump to</span>${nav.join("")}</div>`;
+
+  if(state.posterSort==="num")
+    html+=`<div class="pill-note">📌 Board numbers aren't published yet — within each session, posters are ordered by relevance as a stand-in and will snap to board order once <code>build.py</code> picks up the numbers.</div>`;
+
+  dates.forEach(date=>{
+    const sessions=byDate[date];
+    const total=Object.values(sessions).reduce((n,a)=>n+a.length,0);
+    html+=`<div class="day"><h2>${date==="TBD"?"Date TBD":fmtDay(date)}</h2>
+           <span class="n">${total} posters</span></div>`;
+    orderSessions(sessions).forEach(sess=>{
+      const meta=D.sessions[sess]||{};
+      html+=`<div class="sess" id="${sessAnchor(sess)}"><h3>${esc(sess)} <span class="cnt">(${sessions[sess].length})</span></h3>
+             <span class="info">${meta.start?`🕑 ${meta.start}–${meta.end}`:""} ${meta.room?`· 📍 ${esc(meta.room)}`:""}</span></div>`;
+      html+=`<div class="grid">`;
+      sessions[sess].sort(sorter).forEach(p=>html+=posterCard(p));
+      html+=`</div>`;
+    });
+  });
+  return html || emptyMsg();
+}
+function posterCard(p){
+  const num = p.pos!=null ? `<span class="num">#${p.pos}</span>`
+                          : `<span class="num na">#—</span>`;
+  const on = starred.has(p.id);
+  const starBtn = p.own ? "" :
+    `<button class="starbtn${on?' on':''}" onclick="toggleStar(${p.id},this)">${on?'★ Starred':'☆ Star'}</button>`;
+  return `<div class="card ${p.own?'own':''}${on?' picked':''}">
+    ${p.own?'<span class="star">★</span>':num}
+    <h4>${esc(p.title)}</h4>
+    ${p.own?'<div class="auth"><b>★ your paper</b></div>':""}
+    ${p.own&&p.date?`<div class="when"><span>📅 ${fmtDay(p.date)}</span><span>🕑 ${esc(p.time)}–${esc(p.end)}</span><span>🪧 ${esc(p.session)}</span>${p.room?`<span>📍 ${esc(p.room)}</span>`:""}</div>`:""}
+    ${p.topic?`<div class="topic">${esc(p.topic)}</div>`:""}
+    <div class="tags">${tagHTML(p.themes)}</div>
+    <div class="links">
+      ${starBtn}
+      ${p.url?`<a href="https://icml.cc${esc(p.url)}" target="_blank">ICML page ↗</a>`:""}
+      ${p.paper?`<a href="${esc(p.paper)}" target="_blank">paper ↗</a>`:""}
+    </div>
+  </div>`;
+}
+
+/* ---------- OVERVIEW view ---------- */
+function renderOverview(){
+  let html="";
+  // my papers
+  const mine=D.posters.filter(p=>p.own);
+  if(mine.length){
+    html+=`<div class="mine"><h3>★ Your ICML 2026 posters</h3><div class="grid">`;
+    mine.forEach(p=>html+=posterCard(p)); html+=`</div></div>`;
+  }
+  // theme summary cards
+  html+=`<div class="grouphdr">Your interests at a glance</div><div class="grid">`;
+  D.themes.forEach(t=>{
+    const pc=D.posters.filter(p=>(p.themes||[]).includes(t.key)).length;
+    const ec=D.events.filter(e=>(e.themes||[]).includes(t.key)).length;
+    html+=`<div class="card" style="border-left:5px solid ${t.color};cursor:pointer"
+       onclick="isolate('${t.key}')">
+      <h4>${esc(t.label)}</h4>
+      <div class="auth">${pc} posters · ${ec} events</div>
+      <div class="auth" style="font-size:.74rem">click to filter →</div>
+    </div>`;
+  });
+  html+=`</div>`;
+  // day-by-day capsule
+  html+=`<div class="grouphdr">Conference at a glance</div>`;
+  const cap=[
+    ["2026-07-06","Tutorials — full day of deep-dives (incl. diffusion, probabilistic numerics)"],
+    ["2026-07-07","Main conference opens · invited talks · Oral sessions 1–2 · Poster Sessions 1–2"],
+    ["2026-07-08","Oral sessions 3–4 · Poster Sessions 3–5"],
+    ["2026-07-09","Oral sessions 5–6 · Poster Sessions 6–8"],
+    ["2026-07-10","Workshops (day 1)"],
+    ["2026-07-11","Workshops (day 2)"],
+  ];
+  html+=`<div class="grid">`;
+  cap.forEach(([d,desc])=>{
+    html+=`<div class="card"><div class="badge">${fmtDay(d)}</div><h4 style="font-weight:500;font-size:.9rem;padding:0">${esc(desc)}</h4></div>`;
+  });
+  html+=`</div>`;
+  return html;
+}
+function isolate(k){
+  state.themes=new Set([k]); syncChips();
+  document.querySelector('.tabs button[data-tab="posters"]').click();
+}
+
+function emptyMsg(){return `<div class="empty">No matches. Try turning off “Relevant to me only”, clearing the search, or re-enabling theme chips.</div>`;}
+
+/* ---------- main render ---------- */
+function render(){
+  const v=document.getElementById("view"), c=document.getElementById("count");
+  renderDatebar();
+  // update legend counts (respecting search + relOnly + date, ignoring theme filter)
+  D.themes.forEach(t=>{
+    const base = (state.tab==="events"?D.events:state.tab==="posters"?D.posters:[...D.posters,...D.events]);
+    const n=base.filter(x=>relOK(x)&&searchOK(x)&&dateOK(x)&&starOK(x)&&(x.themes||[]).includes(t.key)).length;
+    const el=document.getElementById("ct_"+t.key); if(el) el.textContent=n;
+  });
+  if(state.tab==="overview"){ v.innerHTML=renderOverview(); c.textContent=""; return; }
+  if(state.tab==="events"){
+    const n=D.events.filter(pass).length;
+    c.textContent=`${n} events shown` + (state.relOnly?" · relevant to your interests":"");
+    v.innerHTML=renderEvents();
+  } else {
+    const n=D.posters.filter(pass).length;
+    c.textContent=`${n} posters shown · grouped by date & session` + (state.relOnly?" · relevant to your interests":"");
+    v.innerHTML=renderPosters();
+  }
+}
+document.getElementById("sortWrap").style.display="none";
+document.getElementById("starOnlyWrap").style.display="none";
+document.getElementById("clearStars").style.display="none";
+updateStarCount();
+render();
+</script>
+</body>
+</html>

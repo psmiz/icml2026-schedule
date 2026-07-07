@@ -366,8 +366,12 @@ function renderPosters(){
   });
   if(nav.length) html+=`<div class="sessnav"><span class="sessnav-lbl">Jump to</span>${nav.join("")}</div>`;
 
-  if(state.posterSort==="num")
-    html+=`<div class="pill-note">📌 Board numbers aren't published yet — within each session, posters are ordered by relevance as a stand-in and will snap to board order once <code>build.py</code> picks up the numbers.</div>`;
+  if(state.posterSort==="num"){
+    const haveBoards=items.some(p=>p.pos!=null);
+    html+= haveBoards
+      ? `<div class="pill-note">📌 Ordered by board number within each session (posters without an assigned board number come last).</div>`
+      : `<div class="pill-note">📌 Board numbers aren't published yet — within each session, posters are ordered by relevance as a stand-in and will snap to board order once <code>build.py</code> picks up the numbers.</div>`;
+  }
 
   dates.forEach(date=>{
     const sessions=byDate[date];

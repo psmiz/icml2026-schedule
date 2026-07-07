@@ -14,6 +14,21 @@ Re-run any time to refresh:  python3 build.py
 (Uses .cache/ if present; pass --fresh to force re-download.)
 """
 import json, re, sys, os, urllib.request
+from datetime import datetime, timezone, timedelta
+
+KST = timezone(timedelta(hours=9))   # ICML 2026 is in Seoul; show local Seoul time
+
+
+def to_kst(iso):
+    """Parse an ISO datetime (any offset ICML uses) -> (date 'YYYY-MM-DD', 'HH:MM')
+    in Korea Standard Time. Handles the source switching between +09:00 and -07:00."""
+    if not iso:
+        return "", ""
+    try:
+        dt = datetime.fromisoformat(iso).astimezone(KST)
+        return dt.strftime("%Y-%m-%d"), dt.strftime("%H:%M")
+    except ValueError:
+        return iso[:10], iso[11:16]   # fallback: naive slice
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CACHE = os.path.join(HERE, ".cache")
@@ -177,19 +192,28 @@ def main():
         names = [x.get("fullname", "") for x in (a or [])]
         return names
 
+    def board_num(raw):
+        # ICML gives board positions like "#3609"; keep the integer for clean
+        # display (template adds the "#") and correct numeric sorting.
+        if not raw:
+            return None
+        digits = re.sub(r"\D", "", str(raw))
+        return int(digits) if digits else None
+
     posters = []
     own = []
     for x in op:
         if x["eventtype"] != "Poster":
             continue
-        st = x.get("starttime") or ""
         s, hits = score(x["name"] + " " + (x.get("topic") or ""), x.get("topic"))
+        p_date, p_time = to_kst(x.get("starttime"))
+        _, p_end = to_kst(x.get("endtime"))
         rec = dict(
             id=x["id"], title=x["name"], authors=authors_str(x["authors"])[:6],
             topic=x.get("topic") or "", session=x.get("session") or "",
-            date=st[:10], time=st[11:16], end=(x.get("endtime") or "")[11:16],
+            date=p_date, time=p_time, end=p_end,
             room=x.get("room_name") or "", url=x.get("virtualsite_url") or "",
-            paper=x.get("paper_url") or "", pos=x.get("poster_position") or None,
+            paper=x.get("paper_url") or "", pos=board_num(x.get("poster_position")),
             score=s, themes=hits,
         )
         if any(o.lower() in x["name"].lower() for o in OWN_PAPERS):
@@ -228,7 +252,7 @@ def main():
                                                    end=p["end"], room=p["room"]))
 
     out = dict(
-        generated="2026-06-17",
+        generated="2026-06-18",
         # Identity scrubbed for public sharing; the page header no longer shows it.
         person=dict(
             name="", affil="", home="",

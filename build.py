@@ -85,6 +85,10 @@ THEMES = [
          kw=["neuroscience","brain","cognitive","biologically plausible","neural coding",
              "spiking","cortex","cortical","neuro-inspired","brain-inspired"],
          topics=["Applications->Neuroscience, Cognitive Science"]),
+    dict(key="tsbio", label="Time-Series & EEG Foundation Models", color="#087f5b", weight=4,
+         kw=["time series foundation","time-series foundation","eeg","electroencephalo",
+             "brain-computer","brain computer"," bci","physiological time","biosignal"],
+         topics=[]),
     # Non-core: a broad context signal. Shown as a tag, but does NOT by itself make a
     # paper "relevant to me" (otherwise nearly every LLM paper would qualify).
     dict(key="llm", label="LLMs & Foundation Models", color="#495057", weight=2, core=False,
